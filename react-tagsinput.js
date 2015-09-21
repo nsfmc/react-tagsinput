@@ -78,6 +78,7 @@
       , validateAsync: React.PropTypes.func
       , renderTag: React.PropTypes.func
       , required: React.PropTypes.bool
+      , draggable: React.PropTypes.bool
     }
 
     , getDefaultProps: function () {
@@ -102,6 +103,7 @@
         , transform: function (tag) { return tag.trim(); }
         , renderTag: null
         , required: false
+        , draggable: true
       };
     }
 
@@ -303,6 +305,7 @@
 
     , render: function() {
       var ns = this.props.classNamespace === "" ? "" : this.props.classNamespace + "-";
+      var draggableClass = this.props.draggable ? " draggable" : "";
 
       var tagNodes = this._value().map(function (tag, i) {
         var removeTag = this.removeTag.bind(null, tag)
@@ -326,7 +329,7 @@
       return (
         React.createElement("div", {
           style: this.props.style,
-          className: this.props.classNames.div || ns + "tagsinput"
+          className: this.props.classNames.div || ns + "tagsinput" + draggableClass
           , onClick: this.handleClick
         }, tagNodes, React.createElement(Input, {
           ref: "input"
