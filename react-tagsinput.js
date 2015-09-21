@@ -44,14 +44,14 @@
       return (
         React.createElement("span", {
           className: this.props.classNames.wrapper || this.props.ns + 'tagsinput-tag-wrapper' + dragClass
-        }, React.createElement("span", {
-          className: this.props.classNames.tag || this.props.ns + "tagsinput-tag"
-          , draggable: this.props.draggable
-          , onDragStart: this.props.onDragStart
           , onDragOver: this.props.onDragOver
           , onDragEnter: this.props.onDragEnter
           , onDragLeave: this.props.onDragLeave
           , onDrop: this.props.onDrop
+        }, React.createElement("span", {
+          className: this.props.classNames.tag || this.props.ns + "tagsinput-tag"
+          , draggable: this.props.draggable
+          , onDragStart: this.props.onDragStart
         }, this.props.tag, React.createElement("a", {
           onClick: this.props.remove
           , className: this.props.classNames.remove || this.props.ns + "tagsinput-remove"
@@ -112,7 +112,7 @@
         , transform: function (tag) { return tag.trim(); }
         , renderTag: null
         , required: false
-        , draggable: true
+        , draggable: false
       };
     }
 
@@ -355,12 +355,17 @@
     }
 
     , dragLeave: function (tag, e) {
-      if (!this._dragging) {
-        this._dragging = 1;
-      }
-      this._dragging--;
-      if (this._dragging === 0) {
-        this.setState({dragging: null});
+      if (e.dataTransfer.types.indexOf('text/tag') !== -1) {
+        var dropped = e.dataTransfer.getData('text/tag');
+        if (dropped !== tag) {
+          if (!this._dragging) {
+            this._dragging = 1;
+          }
+          this._dragging--;
+          if (this._dragging === 0) {
+            this.setState({dragging: null});
+          }
+        }
       }
     }
 
