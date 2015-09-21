@@ -22,7 +22,21 @@
 
 .react-tagsinput.draggable .react-tagsinput-tag {
   cursor: move;
+  cursor: -moz-grab;
   cursor: -webkit-grab;
+}
+
+.react-tagsinput-tag-wrapper.dragging::before {
+  content: '';
+  display: inline-block;
+  border: 1px solid #ddd;
+  width: 20px;
+  height: 25px;
+  background: whitesmoke;
+  border-radius: 2px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  vertical-align: bottom;
 }
 
 .react-tagsinput-remove {

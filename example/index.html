@@ -59,7 +59,7 @@
       render: function () {
         return (
           React.createElement("div", null,
-            React.createElement(ReactTagsInput, {valueLink: this.linkState("tags")}),
+            React.createElement(ReactTagsInput, {valueLink: this.linkState("tags"), draggable: true}),
             React.createElement("button", {onClick: this.saveTags}, "Save")
           )
         );

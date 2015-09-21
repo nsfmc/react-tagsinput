@@ -40,13 +40,22 @@
 
   var Tag = React.createClass({
     render: function () {
+      var dragClass = this.props.dragging ? ' dragging' : '';
       return (
         React.createElement("span", {
+          className: this.props.classNames.wrapper || this.props.ns + 'tagsinput-tag-wrapper' + dragClass
+        }, React.createElement("span", {
           className: this.props.classNames.tag || this.props.ns + "tagsinput-tag"
+          , draggable: this.props.draggable
+          , onDragStart: this.props.onDragStart
+          , onDragOver: this.props.onDragOver
+          , onDragEnter: this.props.onDragEnter
+          , onDragLeave: this.props.onDragLeave
+          , onDrop: this.props.onDrop
         }, this.props.tag, React.createElement("a", {
           onClick: this.props.remove
           , className: this.props.classNames.remove || this.props.ns + "tagsinput-remove"
-        }))
+        })))
       );
     }
   });
@@ -115,6 +124,7 @@
         , tag: ""
         , invalid: false
         , validating: false
+        , dragging: null
       };
     }
 
@@ -303,12 +313,64 @@
       this.props.onClick(e);
     }
 
+    , dragStart: function (tag, e) {
+      e.dataTransfer.setData('text/tag', tag);
+    }
+
+    , drop: function (tag, e) {
+      var dropped = e.dataTransfer.getData('text/tag');
+      if (dropped) {
+        e.preventDefault();
+        this.setState({dragging: null});
+        this._valueTransaction(function (value) {
+          value.splice(value.indexOf(dropped), 1);
+          value.splice(value.indexOf(tag), 0, dropped);
+          return value;
+        }.bind(this), dropped);
+      }
+    }
+
+    , dragOver: function (tag, e) {
+      if (e.dataTransfer.types.indexOf('text/tag') !== -1) {
+        var dropped = e.dataTransfer.getData('text/tag');
+        if (dropped !== tag) {
+          e.preventDefault();
+        }
+      }
+    }
+
+    , dragEnter: function (tag, e) {
+      if (e.dataTransfer.types.indexOf('text/tag') !== -1) {
+        var dropped = e.dataTransfer.getData('text/tag');
+        if (dropped !== tag) {
+          if (!this._dragging) {
+            this._dragging = 1;
+          } else {
+            this._dragging++;
+          }
+          e.preventDefault();
+          this.setState({dragging: tag});
+        }
+      }
+    }
+
+    , dragLeave: function (tag, e) {
+      if (!this._dragging) {
+        this._dragging = 1;
+      }
+      this._dragging--;
+      if (this._dragging === 0) {
+        this.setState({dragging: null});
+      }
+    }
+
     , render: function() {
       var ns = this.props.classNamespace === "" ? "" : this.props.classNamespace + "-";
       var draggableClass = this.props.draggable ? " draggable" : "";
 
       var tagNodes = this._value().map(function (tag, i) {
         var removeTag = this.removeTag.bind(null, tag)
+        var isDragging = this.state.dragging === tag;
 
         if (this.props.renderTag) {
           return this.props.renderTag(i, tag, removeTag);
@@ -320,6 +382,13 @@
           , tag: tag
           , classNames: this.props.classNames
           , remove: removeTag
+          , draggable: this.props.draggable
+          , dragging: isDragging
+          , onDragStart: this.dragStart.bind(this, tag)
+          , onDragOver: this.dragOver.bind(this, tag)
+          , onDragEnter: this.dragEnter.bind(this, tag)
+          , onDragLeave: this.dragLeave.bind(this, tag)
+          , onDrop: this.drop.bind(this, tag)
         });
       }.bind(this));
 
